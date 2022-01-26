@@ -121,181 +121,297 @@
         <h2><b>ENJOY FREE CAREER GAMES PLAY NOW </b></h2>
     </section>
     <h1>BREAK YOUR CONFUSIONS WITH LC HIGHWAY </h1>
-    <section class="game4">
-        <canvas id="myCanvas" class="responsive-canvas" width="800" height="300"></canvas>
-    </section>
+
+    <section id="game5">
+      <!-- <button id="btn">help</button><button id="settings">settings</button><button id=projects>Projects</button> <br> -->
+      <div style="display:none" id="help">
+        1. Dodge the green obstacles.<br>
+        2. Tap to jump.<br>
+        3. Double tap to dash.<br>
+        4. Extra dash(es) depends difficulty<br>
+        5. Brought to you by:
+        <dd>Sjoerd and a lot of support.</dd>
+        Dashes: <span style="color: green" id="speed"></span><br>
+        <button onclick="Game.speed()">faster</button>
+        </div>
+        <div id=options style="display: none;">
+            <input type="radio" checked value="0" name="dif"> easy<br>
+            <input type="radio" checked value="1" name="dif"> normal<br>
+            <input type="radio" checked value="2" name="dif"> hard<br>
+        </div>
+        </div>
     <script>
-    
-        var canvas = document.getElementById("myCanvas");
-        var ctx = canvas.getContext("2d");
-        var ballRadius = 10;
-        var x = canvas.width/2;
-        var y = canvas.height-30;
-        var dx = 2;
-        var dy = -2;
-        var paddleHeight = 10;
-        var paddleWidth = 75;
-        var paddleX = (canvas.width-paddleWidth)/2;
-        var rightPressed = false;
-        var leftPressed = false;
-        var brickRowCount = 5;
-        var brickColumnCount = 3;
-        var brickWidth = 75;
-        var brickHeight = 20;
-        var brickPadding = 10;
-        var brickOffsetTop = 30;
-        var brickOffsetLeft = 30;
-        var score = 15;
-        var lives = 10;
-        
-        var bricks = [];
-        for(c=0; c<brickColumnCount; c++) {
-            bricks[c] = [];
-            for(r=0; r<brickRowCount; r++) {
-                bricks[c][r] = { x: 0, y: 0, status: 1 };
-            }
+
+        var highscore;
+        window.onload = function() {
+            highscore = 0;
+            setup()
+            document.getElementsByName("dif")[1].checked = true;
         }
         
-        document.addEventListener("keydown", keyDownHandler, false);
-        document.addEventListener("keyup", keyUpHandler, false);
-        document.addEventListener("mousemove", mouseMoveHandler, false);
+        function setup() {
+            Game.start()
+            Background = new component(1000, 250, "https://thumbs.dreamstime.com/t/de-achtergrond-van-het-beeldverhaalspel-66479732.jpg", 0, -3, "background");
+            Background1 = new component(1000, 250, "https://thumbs.dreamstime.com/t/de-achtergrond-van-het-beeldverhaalspel-66479732.jpg", 915, -3, "background");
+            Player = new component(25, 25, "blue", 25, 175);
+            Obstacle1 = new component(0, 25, "lightGreen", 330, 175);
+            Obstacle2 = new component(0, 25, "lightGreen", 330, 175);
+            Score = new component("20px", "Arial", "black", 3, 46, "text", "SCORE:", "");
+            HighScore = new component("20px", "Arial", "black", 3, 23, "text", "HIGHSCORE:", "");
+            Creator = new component("13px", "Times New Roman", "lightGrey", 8, 233, "text", "Sjoerd Inc.", "italic ");
+            GameOver1 = new component(Game.canvas.width, 250, "lightGrey", Game.canvas.width/2, 125);
+            GameOver2 = new component("20px", "Serif", "#222", Game.canvas.width/2-55, 120, "text", "Game Over", "");
+            GameOver3 = new component("12px", "Sans-Serif", "#222", Game.canvas.width/2-50, 140, "text", "click to play again", "");
+            Game.intervalSpeed = 10 - opn;
+            Game.dashes = op[0][1];
+        }
         
-        function keyDownHandler(e) {
-            if(e.keyCode == 39) {
-                rightPressed = true;
-            }
-            else if(e.keyCode == 37) {
-                leftPressed = true;
+        var BackGround, BackGround1, Player, Obstacle1, Obstacle2, GameOver1, GameOver2, GameOver3, Score, HighScore, Creator, opn=1;
+        var op = [[3, 1],[5, 175]];
+        var opS = 
+        [
+            [[5, 3], [3, 1], [6, 2]],
+            [[7, 185], [5, 175], [3, 165]]
+        ];
+        const game5 = document.getElementById("game5");
+        console.log(game5.childNodes[1])
+        var Game = {
+            canvas : document.createElement("canvas"),
+            start : function() {
+                this.canvas.width = screen.width;
+                this.canvas.height = 245;
+                this.canvas.style.transition = "transform 1ms";
+                this.canvas.addEventListener("mousedown", jumpTrigger);
+                this.canvas.addEventListener("dblclick", dash);
+                this.context = this.canvas.getContext("2d");
+                this.score = 0;
+                this.highscore = highscore;
+                this.dash = false;
+                this.dashes = 1;
+                game5.insertBefore(this.canvas, game5.childNodes[1]);
+                this.intervalSpeed = 9;
+                setTimeout(updateGame, Game.intervalSpeed);
+            },
+            clear : function() {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
+            stop : function() {
+                this.canvas.removeEventListener("mousedown", jumpTrigger);
+                this.canvas.removeEventListener("dblclick", dash);
+                this.canvas.addEventListener("click", reset);
+                this.intervalSpeed = Math.pow(10,14);
+                GameOver1.update()
+                GameOver2.update()
+                GameOver3.update()
+            },
+            speed : function() {
+                this.intervalSpeed = this.intervalSpeed / 200 * op[1][1];
             }
         }
-        function keyUpHandler(e) {
-            if(e.keyCode == 39) {
-                rightPressed = false;
+        
+        
+        
+        function updateGame() {
+            opn = opUd(document.getElementsByName("dif"));
+            Game.clear()
+            Background.update()
+            Background1.update()
+            Creator.update()
+            if (!Game.dash) {
+                Player.jump()
+                Player.move()
             }
-            else if(e.keyCode == 37) {
-                leftPressed = false;
+            if (Obstacle2.x == 150 || Obstacle2.speedX == 0) {Obstacle1.speedX = -1; Obstacle1.width = 15;}
+            if (Obstacle1.x <= -15) {
+                Obstacle1.x += (Math.round(Math.random() * 100 + 330));
+                Obstacle1.speedX = 0;
+                Obstacle1.width = 0;
             }
-        }
-        function mouseMoveHandler(e) {
-            var relativeX = e.clientX - canvas.offsetLeft;
-            if(relativeX > 0 && relativeX < canvas.width) {
-                paddleX = relativeX - paddleWidth/2;
+            if (Obstacle1.x == 150) {Obstacle2.speedX = -1; Obstacle2.width = 15}
+            if (Obstacle2.x <= -15) {
+                Obstacle2.x += (Math.round(Math.random() * 100 + 330));
+                Obstacle2.speedX = 0;
+                Obstacle1.width = 0;
             }
-        }
-        function collisionDetection() {
-            for(c=0; c<brickColumnCount; c++) {
-                for(r=0; r<brickRowCount; r++) {
-                    var b = bricks[c][r];
-                    if(b.status == 1) {
-                        if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
-                            dy = -dy;
-                            b.status = 0;
-                            score--;
-                            if(score == 0) {
-                                alert("you won :)!");
-                                document.location.reload();
-                            }
-                        }
-                    }
+            Player.crash(Obstacle1);
+            Player.crash(Obstacle2);
+            if (Obstacle1.x == 30 || Obstacle2.x == 30) {
+                Game.score += 1;
+                if (Game.score % op[0][0] == 0) {
+                    Game.dashes += op[0][1];
+                }
+                if (Game.score % op[1][0] == 0) {
+                    Game.speed();
+                }
+                if (Game.score > Game.highscore) {
+                    Game.highscore = Game.score;
                 }
             }
+            //Background moves
+            Background.x += -1;
+            Background1.x += -1;
+            if (Background.x == -915) {Background.x = 915}
+            if (Background1.x == -915) {Background1.x = 915}
+            Obstacle1.move()
+            Obstacle2.move()
+            Score.text = "SCORE: " + Game.score;
+            HighScore.text = "HIGHSCORE: " + Game.highscore;
+            Player.update()
+            Obstacle1.update()
+            Obstacle2.update()
+            Score.update()
+            HighScore.update()
+            document.getElementById("speed").innerHTML = Game.dashes;
+            op = [opS[0][opn], opS[1][opn]];
+            setTimeout(updateGame, Game.intervalSpeed);
         }
         
-        function drawBall() {
-            ctx.beginPath();
-            ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-            ctx.fillStyle = "#90217F";
-            ctx.fill();
-            ctx.closePath();
-        }
-        function drawPaddle() {
-            ctx.beginPath();
-            ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
-        }
-        function drawBricks() {
-            for(c=0; c<brickColumnCount; c++) {
-                for(r=0; r<brickRowCount; r++) {
-                    if(bricks[c][r].status == 1) {
-                        var brickX = (r*(brickWidth+brickPadding))+brickOffsetLeft;
-                        var brickY = (c*(brickHeight+brickPadding))+brickOffsetTop;
-                        bricks[c][r].x = brickX;
-                        bricks[c][r].y = brickY;
-                        ctx.beginPath();
-                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                        ctx.fillStyle = "#ff2500";
-                        ctx.fill();
-                        ctx.closePath();
-                    }
-                }
-            }
-        }
-        function drawScore() {
-            ctx.font = "14px Open Sans";
-            ctx.fillStyle = "#000000";
-            ctx.fillText("Confusions: "+score, 8, 20);
-        }
-        function drawLives() {
-            ctx.font = "14px Open Sans";
-            ctx.fillStyle = "#000000";
-            ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+        function jumpTrigger() {
+            Player.jumping = true;
         }
         
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBricks();
-            drawBall();
-            drawPaddle();
-            drawScore();
-            drawLives();
-            collisionDetection();
+        function reset() {
+            Game.stop();
+            Game.canvas.removeEventListener("click", reset);
+            highscore = Game.highscore;
+            game5.removeChild(Game.canvas);
+            setup();
             
-            if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
-                dx = -dx;
+        }
+        
+        function dash() {
+            if (Game.dashes == 0 || Game.dash) {
+                return;
             }
-            if(y + dy < ballRadius) {
-                dy = -dy;
+            Game.dashes--;
+            Game.intervalSpeed = Game.intervalSpeed/2;
+            Game.dash = true;
+            setTimeout(function(){
+                Game.intervalSpeed = Game.intervalSpeed*2;
+                Game.dash = false;
+            }, 
+                Game.intervalSpeed*100
+            );
+        }
+        
+        function opUd(rad) {
+            for (f = 0; f < rad.length; f++) {
+                if (!rad[f].checked) {continue}
+                else {
+                return Number(rad[f].value);
+                }
             }
-            else if(y + dy > canvas.height-ballRadius) {
-                if(x > paddleX && x < paddleX + paddleWidth) {
-                    dy = -dy;
+        }
+        
+               </script>
+        
+        
+               <script>
+               $("#btn").click(function(){
+                   $('#help').fadeToggle();
+                   $('#promote').fadeOut();
+               });
+               $("#settings, #options").click(function(){
+                   $('#options').fadeToggle();
+               });
+               $("#projects").click(function(){
+                   $('#promote').fadeToggle();
+                   $('#help').fadeOut();
+               });
+               </script>
+               <script id=antilag>
+               function component(width, height, color, x, y, type, text, variant) {
+            this.type = type;
+            if (type == "image" || type == "background") {
+                this.image = new Image();
+                this.image.src = color;
+            }
+            if (type == "text") {
+                this.text = text;
+                this.variant = variant;
+            }
+            this.width = width;
+            this.height = height;
+            this.color = color;
+            this.speedX = 0;
+            this.speedY = 0;
+            this.angle = 0;
+            this.jumping = false;
+            this.jumpframe = 0;
+            this.gravity = 0.05;
+            this.gravitySpeed = 0;
+            this.x = x;
+            this.y = y;
+            this.update = function() {
+                ctx = Game.context;
+                if (type == "background") {
+                    ctx.drawImage(this.image, 
+                    this.x, this.y, this.width, this.height);
+                }
+                else if (type == "text") {
+                    ctx.fillStyle = this.color;
+                    ctx.font = this.variant + this.width + " " + this.height;
+                    //ctx.fontVariant = this.txtVariant;
+                    ctx.fillText(this.text, this.x, this.y);
                 }
                 else {
-                    lives--;
-                    if(!lives) {
-                        alert("GAME OVER");
-                        document.location.reload();
-                    }
-                    else {
-                        x = canvas.width/2;
-                        y = canvas.height-30;
-                        dx = 3;
-                        dy = -3;
-                        paddleX = (canvas.width-paddleWidth)/2;
-                    }
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+                    ctx.restore();
                 }
             }
-            
-            if(rightPressed && paddleX < canvas.width-paddleWidth) {
-                paddleX += 7;
+            this.move = function() {
+                this.x += this.speedX;
+                this.y += this.speedY + this.gravitySpeed;
+                if (this.y > 200 - this.height) {
+                    this.gravitySpeed = 0;
+                    this.y = 200 - this.height;
+                }
+                else {
+                    this.gravitySpeed = this.gravity;
+                }
             }
-            else if(leftPressed && paddleX > 0) {
-                paddleX -= 7;
+            this.jump = function() {
+                switch (this.jumpframe) {
+                    case 0: if (this.jumping) {this.speedY = -1.2; this.jumpframe += 1}
+                            break;
+                   case 45: this.speedY = -0.3;
+                            this.jumpframe += 1;
+                            this.angle += 0.5 * Math.PI / 100;
+                            break;
+                   case 50: this.speedY = 0.3;
+                            this.angle += 0.5 * Math.PI / 100;
+                            this.jumpframe += 1;
+                            break;
+                   case 55: this.speedY = 1.2;
+                            this.jumpframe += 1;
+                            this.angle += 0.5 * Math.PI / 100;
+                            break;
+                  case 100: this.speedY = 0;
+                            this.angle += 0.5 * Math.PI / 100;
+                            this.jumping = false;
+                            this.jumpframe = 0;
+                            break;
+                   default: this.angle += 0.5 * Math.PI / 100;
+                            this.jumpframe += 1;
+                            break;
+                }
             }
-            
-            x += dx;
-            y += dy;
-            requestAnimationFrame(draw);
+            this.crash = function(obstacle) {
+                if (10 < obstacle.x && obstacle.x < 44 && this.y > 149) {
+                    Game.stop()
+                }
+            }
         }
-            draw();
-        
-        </script>
-  
+               </script>
+    </section>
+              
   <!-- <button onclick="Play()">Play</button> -->
-    <h1>PROFESSION SPIN WHEEL GAME </h1>
-    <section class="game-1">
+  <section class="game-1">
+        <h1>PROFESSION SPIN WHEEL GAME </h1>
         <div id="question">
             <h1></h1>
         </div>
@@ -461,8 +577,8 @@ function setGameUp() {
 
 setGameUp()
 </script>
-   <h1>PROFESSION COLLEGE WHEEL GAME</h1>
-   <section class="game-2">
+<section class="game-2">
+       <h1>PROFESSION COLLEGE WHEEL GAME</h1>
        <div id="question1">
            <h1></h1>
        </div>

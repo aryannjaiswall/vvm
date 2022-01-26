@@ -1,3 +1,15 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+
+h1{
+  margin: 20px;
+}
+
+p{
+  margin: 10px;
+}
 body {
   font-family:helvetica neue,san-serif;
   text-align:center;
@@ -148,17 +160,7 @@ body {
     width: min(48px, calc(100vw / 11));
 }
 }
-canvas{ 
-  background: #FFFDE1 ; 
-  display: block; 
-  margin: 0 auto; 
-}
-.responsive-canvas{
-  width: 100%;
-}
 
-@media screen and (max-width: 768px) and (min-width: 320px) {
-  .responsive-canvas {
-      height: 200px;
-  }
+.game-1, .game-2{
+  background-color: #fff;
 }
